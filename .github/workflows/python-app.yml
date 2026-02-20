@@ -15,7 +15,7 @@ permissions:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         pytest
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     if: github.ref == 'refs/heads/main'
 
@@ -47,8 +47,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Production
+      - name: Deploy to Loacl Mac Server
         run: |
-          echo "Starting deployment..."
-          # Replace this echo with actual deployment commands, for example:
-          # ssh user@your-server "cd /path/to/project && git pull && systemctl restart your-service"
+          echo "Deploying to local Mac server..."
+
+          APP_DIR=~/prod/python-app
+
+          rm -rf $APP_DIR/*
+          cp -r ./* $APP_DIR/
+
+          echo "Deployment completed"
