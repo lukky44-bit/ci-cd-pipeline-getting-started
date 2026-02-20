@@ -25,16 +25,17 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip3 install flake8 pytest
-        if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
+        python3 -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then python3 -m pip install -r requirements.txt; fi
 
     - name: Lint with flake8
       run: |
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Using 'python3 -m' ensures the runner finds flake8 even if it's not in the system PATH
+        python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        python3 -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test with pytest
-      run: pytest
+      run: python3 -m pytest
 
   deploy:
     runs-on: self-hosted
@@ -45,12 +46,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Loacl Mac Server
+      - name: Deploy to Local Mac Server
         run: |
           echo "Deploying to local Mac server..."
 
+          # Define the target directory
           APP_DIR=~/prod/python-app
 
+          # Create the directory if it doesn't exist
+          mkdir -p $APP_DIR
+
+          # Clean the old files and copy the fresh ones
           rm -rf $APP_DIR/*
           cp -r ./* $APP_DIR/
 
