@@ -43,21 +43,25 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Deploy to Local Mac Server
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Deploy to Mac via SSH
         run: |
-          echo "Deploying to local Mac server..."
+          ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+            cd ~/mac-prod/python-app
 
-          # Define the target directory
-          APP_DIR=~/prod/python-app
+            if [ ! -d .git ]; then
+              git clone https://github.com/lukky44-bit/ci-cd-pipeline-getting-started.git .
+            else
+              git pull origin main
+            fi
 
-          # Create the directory if it doesn't exist
-          mkdir -p $APP_DIR
-
-          # Clean the old files and copy the fresh ones
-          rm -rf $APP_DIR/*
-          cp -r ./* $APP_DIR/
-
-          echo "Deployment completed"
+            echo "Mac SSH deployment successful"
+          EOF
