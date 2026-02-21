@@ -1,4 +1,4 @@
-from src.main2 import add
+from src.main3 import add
 
 
 def test_add_function():
